@@ -31,7 +31,7 @@
       // This function is triggered when the person selects a file in Step 1...
       function bisrvLoad(file) {
 
-        // Read in the contents of the selected file as array buffer...
+        // Read in the contents of the selected file as an array buffer...
         var frBisrv = new FileReader();
         frBisrv.readAsArrayBuffer(file);
         frBisrv.onload = function(event) {
@@ -47,79 +47,11 @@
           // Read the provided file's data into an array...
           bisrvData = new Uint8Array(event.target.result);
 
-          // We'll do a hash-check against it...
-          hashResult = getFirmwareHash(bisrvData);
+          // Determine the logo offset based on the selected file (you may need to adjust this based on your requirements)...
+          logoOffset = 0x9B9030;  // Example offset, you may need to change this based on your needs
 
-          // The result could be either a Promise if it had a bisrv.asd-like structure and we got
-          // a hash, or false otherwise... let's check!
-          if (hashResult instanceof Promise) {
-
-            // We got a Promise! Wait for it to finish so we get our bisrv.asd hash...
-            hashResult.then(function(dataHash) {
-
-              // Check the hash against all the known good ones...
-              switch (knownHash(dataHash)) {
-
-                // Mid-March BIOS...
-                case "03.15":
-                  logoOffset = 0x9B9030;
-                  setMessage("info", "bisrvMessages", "INFO: Mid-March <code>bisrv.asd</code> detected.");
-                  break;
-
-                // April 20th BIOS...
-                case "04.20":
-                  logoOffset = 0x9B91D8;
-                  setMessage("info", "bisrvMessages", "INFO: April 20th <code>bisrv.asd</code> detected.");
-                  break;
-
-                // May 15th BIOS...
-                case "05.15":
-                  logoOffset = 0x9BB0B8;
-                  setMessage("info", "bisrvMessages", "INFO: May 15th <code>bisrv.asd</code> detected.");
-                  break;
-
-                // May 22nd BIOS...
-                case "05.22":
-                  logoOffset = 0x9BB098;
-                  setMessage("info", "bisrvMessages", "INFO: Version 1.5 <code>bisrv.asd</code> detected.");
-                  break;
-                
-                // August 3rd BIOS...
-                case "08.03":
-                  logoOffset = 0x9B3530;
-                  setMessage("info", "bisrvMessages", "INFO: Version 1.6 <code>bisrv.asd</code> detected.");
-                  break;
-
-                // October 7th BIOS...
-                case "10.07":
-                  logoOffset = 0x9B1FE8;
-                  setMessage("warning", "bisrvMessages", "WARNING: Version 1.7 <code>bisrv.asd</code> detected; this version has known issues with SNES save states and is not recommended for use.");
-                  break;
-                
-                // October 13th BIOS...
-                case "10.13":
-                  logoOffset = 0x9B3618;
-                  setMessage("info", "bisrvMessages", "INFO: Version 1.71 <code>bisrv.asd</code> detected.");
-                  break;
-
-                default:
-                  // Huh... wasn't false so had bisrv.asd structure, but didn't return
-                  // a known hash... a new BIOS version? Unknown anyway!
-                  console.log(dataHash);
-                  setMessage("error", "bisrvMessages", "ERROR: While the file you've selected does appear to be generally structured like the SF2000's <code>bisrv.asd</code> BIOS file, the specifics of your file don't match any known SF2000 BIOS version. As such, this tool cannot safely modify the selected file.");
-                  return;
-              }
-
-              // If we're here we've got a good file, so onwards to Step 2 (image selection)...
-              stepTwo();
-            });
-          }
-          else {
-
-            // We got false, so whatever it was, it wasn't a bisrv.asd...
-            setMessage("error", "bisrvMessages", "ERROR: The file you've selected doesn't appear to have the same data structure as expected for a <code>bisrv.asd</code> file.");
-            return;
-          }
+          // If we're here, we've got a good file, so onwards to Step 2 (image selection)...
+          stepTwo();
         };
       }
 
@@ -151,7 +83,7 @@
           // The user has chosen a new file; it should be either a PNG or JPEG
           // image for converting to an SF2000 binary image format...
 
-          // First let's clear any old messages...
+          // First, let's clear any old messages...
           document.getElementById("imageMessages").innerHTML = "";
 
           // And clear up any HTML already added after the current step...
@@ -189,7 +121,7 @@
               // the SF2000 (512x200)...
               var imageData = scaleImage(imageToImageData(img), 512, 200, "Nearest Neighbour");
 
-              // Next we'll convert the image data to little-endian RGB565
+              // Next, we'll convert the image data to little-endian RGB565
               // format for the SF2000...
               newLogoData = imageDataToRgb565(imageData);
 
