@@ -14,10 +14,21 @@
     <div id="result"></div>
 
     <script>
-        // Fetch pre-existing data from a .txt file
-        fetch('v0.txt')
-        .then(response => response.text())
-        .then(preExistingData => {
+        // List of text files to compare against
+        const filesToCompare = ['v0.txt', 'v1.txt', 'v2.txt', 'v3.txt', 'v4.txt']; // Add more files if needed
+
+        // Corresponding messages for each file
+        const fileMessages = {
+            'v0.txt': "This is the original R36S Screen.",
+            'v1.txt': "This is Panel 2.",
+            'v2.txt': "This is Panel 3.",
+            'v3.txt': "This is Panel 4.",
+            'v4.txt': "This is Panel 5."
+        };
+
+        // Fetch pre-existing data from text files
+        Promise.all(filesToCompare.map(file => fetch(file).then(response => response.text())))
+        .then(preExistingDataArray => {
             document.getElementById('uploadForm').addEventListener('submit', function(e) {
                 e.preventDefault();
 
@@ -28,7 +39,7 @@
 
                     reader.onload = function(e) {
                         var uploadedData = e.target.result;
-                        var result = compareData(preExistingData, uploadedData);
+                        var result = compareData(preExistingDataArray, uploadedData);
                         displayResult(result);
                     };
 
@@ -38,12 +49,14 @@
         })
         .catch(error => console.error('Error fetching pre-existing data:', error));
 
-        function compareData(preExistingData, uploadedData) {
-            if (preExistingData === uploadedData) {
-                return "This is the original R36S Screen.";
-            } else {
-                return "The uploaded data does not match the pre-existing data.";
+        function compareData(preExistingDataArray, uploadedData) {
+            for (var i = 0; i < preExistingDataArray.length; i++) {
+                if (preExistingDataArray[i] === uploadedData) {
+                    const filename = filesToCompare[i];
+                    return fileMessages[filename];
+                }
             }
+            return "The uploaded data does not match the content of any pre-existing file.";
         }
 
         function displayResult(result) {
