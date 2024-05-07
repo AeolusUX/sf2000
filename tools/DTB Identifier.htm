@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>File Comparator</title>
+</head>
+<body>
+    <h1>File Comparator</h1>
+    <form id="uploadForm" enctype="multipart/form-data">
+        <label>Upload DTB File: <input type="file" id="fileInput" name="fileInput" accept=".dtb"></label><br>
+        <button type="submit">Compare File</button>
+    </form>
+    <div id="result"></div>
+
+    <script>
+        // Fetch pre-existing data from a .txt file
+        fetch('v0.txt')
+        .then(response => response.text())
+        .then(preExistingData => {
+            document.getElementById('uploadForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+
+                var uploadedFile = document.getElementById('fileInput').files[0];
+
+                if (uploadedFile) {
+                    var reader = new FileReader();
+
+                    reader.onload = function(e) {
+                        var uploadedData = e.target.result;
+                        var result = compareData(preExistingData, uploadedData);
+                        displayResult(result);
+                    };
+
+                    reader.readAsText(uploadedFile);
+                }
+            });
+        })
+        .catch(error => console.error('Error fetching pre-existing data:', error));
+
+        function compareData(preExistingData, uploadedData) {
+            if (preExistingData === uploadedData) {
+                return "This is the original R36S Screen.";
+            } else {
+                return "The uploaded data does not match the pre-existing data.";
+            }
+        }
+
+        function displayResult(result) {
+            document.getElementById('result').innerText = result;
+        }
+    </script>
+</body>
+</html>

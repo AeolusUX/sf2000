@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DTB File Data Extractor</title>
+</head>
+<body>
+    <h1>DTB File Data Extractor</h1>
+    <form id="uploadForm" enctype="multipart/form-data">
+        <label>Upload DTB File: <input type="file" id="fileInput" name="fileInput" accept=".dtb"></label><br>
+        <button type="submit">Extract Data</button>
+    </form>
+
+    <script>
+        document.getElementById('uploadForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            var uploadedFile = document.getElementById('fileInput').files[0];
+
+            if (uploadedFile) {
+                var reader = new FileReader();
+
+                reader.onload = function(e) {
+                    var extractedData = e.target.result;
+                    saveToFile(extractedData);
+                };
+
+                reader.readAsText(uploadedFile);
+            }
+        });
+
+        function saveToFile(data) {
+            var blob = new Blob([data], { type: 'text/plain' });
+            var url = URL.createObjectURL(blob);
+
+            var a = document.createElement('a');
+            a.href = url;
+            a.download = 'extracted_data.txt';
+            a.click();
+
+            URL.revokeObjectURL(url);
+        }
+    </script>
+</body>
+</html>
